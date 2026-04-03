@@ -1,0 +1,45 @@
+{
+  "debug": false,
+  "host": "0.0.0.0",
+  "port": "8848",
+  "apiVersion": "",
+  "ghWxid": "",
+  "adminKey": "",
+
+  "workerpoolsize": 500,
+  "maxworkertasklen": 1000,
+  "redisConfig": {
+    "Host": "redis",
+    "Port": 6379,
+    "Db": 1,
+    "Pass": "",
+    "MaxIdle": 10,
+    "MaxActive": 20,
+    "IdleTimeout": 5000,
+    "MaxConnLifetime": 30,
+    "ConnectTimeout": 0
+  },
+
+  "mySqlConnectStr": "weixin:weixin123@tcp(mysql:3306)/weixin?charset=utf8mb4&parseTime=true&loc=Local",
+
+  "disabledCmdList": [],
+
+  "newsSynWxId": false,
+  "rocketMq": false,
+  "rocketMqHost": "",
+  "rocketAccessKey": "",
+  "rocketSecretKey": "",
+  "rabbitMq": false,
+  "topic": "wx_sync_msg_topic",
+  "rabbitMqUrl": "",
+  "kafka": false,
+  "kafkaUrl": "",
+  "kafkaUsername": "",
+  "kafkaPassword": "",
+  "dt": true,
+  "cluster": {
+    "clusterName": "",
+    "zkAddr": "",
+    "ectdAddr": ""
+  }
+}

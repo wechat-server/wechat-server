@@ -1,0 +1,80 @@
+version: '3.8'
+
+# 使用 Registry 预构建镜像；在 deploy 目录执行 docker compose up -d
+
+services:
+  wechat-server:
+    image: ${WECHAT_SERVER_IMAGE}
+    container_name: wechat-server
+    restart: always
+    ports:
+      - "${APP_PORT:-8848}:8848"
+    env_file:
+      - .env
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./setting.docker.json:/app/config/setting.docker.json:ro
+      - wechat_log:/app/log
+      - wechat_qrcode:/app/static/qrcode
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - wechat-network
+
+  mysql:
+    image: ${REGISTRY:-docker.io}/mysql:8.0
+    container_name: wechat-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-weixin}
+      MYSQL_USER: ${MYSQL_USER:-weixin}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-weixin123}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-connections=500
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysql", "-h", "localhost", "-u${MYSQL_USER:-weixin}", "-p${MYSQL_PASSWORD:-weixin123}", "-e", "SELECT 1"]
+      start_period: 30s
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      - wechat-network
+
+  redis:
+    image: ${REGISTRY:-docker.io}/redis:6-alpine
+    container_name: wechat-redis
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - wechat-network
+
+networks:
+  wechat-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  wechat_log:
+  wechat_qrcode:
